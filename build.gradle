@@ -1,0 +1,11 @@
+plugins {
+    id 'java'
+}
+
+def publishScript = file(rootProject.getProjectDir().getPath() + '/publish.gradle')
+if (publishScript.exists()) {
+    apply from: publishScript.path
+}
+
+project.group = projectGroup
+project.version = projectVersion

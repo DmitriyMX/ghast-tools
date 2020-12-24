@@ -1,0 +1,7 @@
+# Gradle
+gradlew                                     text eol=lf
+gradlew.bat                                 text eol=crlf
+gradle/wrapper/gradle-wrapper.properties    text eol=lf
+
+# Other
+.gitattributes  text eol=lf
