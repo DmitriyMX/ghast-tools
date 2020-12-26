@@ -13,15 +13,34 @@ project.version = projectVersion
 repositories {
     mavenLocal()
     mavenCentral()
+    maven { url 'https://hub.spigotmc.org/nexus/content/groups/public' }
 }
 
 ext {
     libs = [
+            bukkit: [lib: 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT', exclude: [
+                    'com.google.code.gson:gson',
+                    'com.google.guava:guava',
+                    'com.googlecode.json-simple:json-simple',
+                    'commons-lang:commons-lang',
+                    'org.yaml:snakeyaml'
+            ]],
             lombok: 'org.projectlombok:lombok:1.18.12'
     ]
+}
+
+def compileOnly2(library) {
+    dependencies.compileOnly library.lib, {
+        library.exclude.each { String excludeLibStr ->
+            String[] excludeLib = excludeLibStr.split(':')
+            exclude group: excludeLib[0], module: excludeLib[1]
+        }
+    }
 }
 
 dependencies {
     compileOnly libs.lombok
     annotationProcessor libs.lombok
+
+    compileOnly2 libs.bukkit
 }
