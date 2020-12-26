@@ -16,14 +16,87 @@ import static java.text.MessageFormat.format;
 @SuppressWarnings("unused")
 public class AssetsManager {
 
+	private static final String ERROR_NOT_FOUND = "Asset \"{0}\" not found";
+
 	public void saveTo(String resourceName, Path targetPath) {
-		URL resourceUrl = AssetsManager.class.getClassLoader().getResource(resourceName);
-		if (resourceUrl == null) {
-			throw new AssetsException(format("Asset \"{0}\" not found", resourceName));
+		URL resourceUrl = getResourceUrl(resourceName);
+
+		Path saveToPath;
+		if (Files.isDirectory(targetPath)) {
+			saveToPath = targetPath.resolve(resourceName);
+		} else {
+			saveToPath = targetPath;
 		}
 
+		doSaveTo(resourceUrl, saveToPath);
+	}
+
+	public void saveTo(String resourceName, File targetPath) {
+		saveTo(resourceName, targetPath.toPath());
+	}
+
+	public InputStream loadResource(Path pluginFolder, String resourceName, String defaultResourceName, boolean saveDefault) {
+		InputStream inputStream;
+
+		Path pathToResource = pluginFolder.resolve(resourceName);
+		if (Files.exists(pathToResource)) {
+			inputStream = openResource(pathToResource);
+		} else if (defaultResourceName != null) {
+			URL resourceUrl = getResourceUrl(defaultResourceName);
+
+			if (saveDefault) {
+				doSaveTo(resourceUrl, pathToResource);
+				inputStream = openResource(pathToResource);
+			} else {
+				inputStream = openResource(resourceUrl);
+			}
+		} else {
+			throw new AssetsException(format(ERROR_NOT_FOUND, resourceName));
+		}
+
+		return inputStream;
+	}
+
+	public InputStream loadResource(Path pluginFolder, String resourceName, String defaultResourceName) {
+		return loadResource(pluginFolder, resourceName, defaultResourceName, true);
+	}
+
+	public InputStream loadResource(Path pluginFolder, String resourceName, boolean saveDefault) {
+		return loadResource(pluginFolder, resourceName, resourceName, saveDefault);
+	}
+
+	public InputStream loadResource(Path pluginFolder, String resourceName) {
+		return loadResource(pluginFolder, resourceName, true);
+	}
+
+	public InputStream loadResource(File pluginFolder, String resourceName, String defaultResourceName, boolean saveDefault) {
+		return loadResource(pluginFolder.toPath(), resourceName, defaultResourceName, saveDefault);
+	}
+
+	public InputStream loadResource(File pluginFolder, String resourceName, String defaultResourceName) {
+		return loadResource(pluginFolder, resourceName, defaultResourceName, true);
+	}
+
+	public InputStream loadResource(File pluginFolder, String resourceName, boolean saveDefault) {
+		return loadResource(pluginFolder.toPath(), resourceName, saveDefault);
+	}
+
+	public InputStream loadResource(File pluginFolder, String resourceName) {
+		return loadResource(pluginFolder, resourceName, true);
+	}
+
+	private URL getResourceUrl(String resourceName) {
+		URL resourceUrl = AssetsManager.class.getClassLoader().getResource(resourceName);
+		if (resourceUrl == null) {
+			throw new AssetsException(format(ERROR_NOT_FOUND, resourceName));
+		}
+
+		return resourceUrl;
+	}
+
+	private void doSaveTo(URL resourceUrl, Path saveToPath) {
 		try (InputStream inputStream = resourceUrl.openStream();
-			 OutputStream outputStream = Files.newOutputStream(targetPath)) {
+			 OutputStream outputStream = Files.newOutputStream(saveToPath)) {
 
 			byte[] buffer = new byte[8192];
 			int count;
@@ -31,11 +104,24 @@ public class AssetsManager {
 				outputStream.write(buffer, 0, count);
 			}
 		} catch (IOException e) {
-			throw new AssetsException(format("Error save asset \"{0}\": {1}", resourceName, e.getMessage()), e);
+			throw new AssetsException(format("Error save asset \"{0}\" to \"{1}\": {2}",
+					resourceUrl, saveToPath, e.getMessage()), e);
 		}
 	}
 
-	public void saveTo(String resourceName, File targetPath) {
-		saveTo(resourceName, targetPath.toPath());
+	private InputStream openResource(Path pathToResource) {
+		try {
+			return Files.newInputStream(pathToResource);
+		} catch (IOException e) {
+			throw new AssetsException(format("Error open asset \"{0}\": {1}", pathToResource, e.getMessage()), e);
+		}
+	}
+
+	private InputStream openResource(URL resourceUrl) {
+		try {
+			return resourceUrl.openStream();
+		} catch (IOException e) {
+			throw new AssetsException(format("Error open asset \"{0}\": {1}", resourceUrl, e.getMessage()), e);
+		}
 	}
 }
