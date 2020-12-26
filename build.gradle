@@ -20,7 +20,6 @@ ext {
     libs = [
             bukkit: [lib: 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT', exclude: [
                     'com.google.code.gson:gson',
-                    'com.google.guava:guava',
                     'com.googlecode.json-simple:json-simple',
                     'commons-lang:commons-lang',
                     'org.yaml:snakeyaml'
