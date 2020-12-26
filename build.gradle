@@ -9,3 +9,19 @@ if (publishScript.exists()) {
 
 project.group = projectGroup
 project.version = projectVersion
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+ext {
+    libs = [
+            lombok: 'org.projectlombok:lombok:1.18.12'
+    ]
+}
+
+dependencies {
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+}

@@ -1,5 +1,7 @@
 package ghast;
 
+import lombok.experimental.UtilityClass;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,14 +12,11 @@ import java.nio.file.Path;
 
 import static java.text.MessageFormat.format;
 
+@UtilityClass
 @SuppressWarnings("unused")
-public final class AssetsManager {
+public class AssetsManager {
 
-	private AssetsManager() {
-		// this is utility class
-	}
-
-	public static void saveTo(String resourceName, Path targetPath) {
+	public void saveTo(String resourceName, Path targetPath) {
 		URL resourceUrl = AssetsManager.class.getClassLoader().getResource(resourceName);
 		if (resourceUrl == null) {
 			throw new AssetsException(format("Asset \"{0}\" not found", resourceName));
@@ -28,7 +27,7 @@ public final class AssetsManager {
 
 			byte[] buffer = new byte[8192];
 			int count;
-			while((count = inputStream.read(buffer)) != -1) {
+			while ((count = inputStream.read(buffer)) != -1) {
 				outputStream.write(buffer, 0, count);
 			}
 		} catch (IOException e) {
@@ -36,7 +35,7 @@ public final class AssetsManager {
 		}
 	}
 
-	public static void saveTo(String resourceName, File targetPath) {
+	public void saveTo(String resourceName, File targetPath) {
 		saveTo(resourceName, targetPath.toPath());
 	}
 }
