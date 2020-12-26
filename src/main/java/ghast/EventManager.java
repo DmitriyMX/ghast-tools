@@ -9,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +19,8 @@ import java.util.function.Consumer;
 @SuppressWarnings("unused")
 public class EventManager {
 
-	public Builder createContext(Plugin plugin) {
-		return new Builder(plugin);
+	public Builder createContext() {
+		return new Builder();
 	}
 
 	@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -30,7 +29,6 @@ public class EventManager {
 		private static final BooleanSupplier EMPTY_FILTER = () -> true;
 
 		private final EventContext eventContext = new EventContext();
-		private final Plugin plugin;
 
 		public Builder filter(BooleanSupplier filter) {
 			eventContext.setFilter(filter != null ? filter : EMPTY_FILTER);
@@ -40,7 +38,7 @@ public class EventManager {
 		public <T extends Event> Builder onEvent(Class<T> eventType, EventPriority eventPriority, Consumer<T> consumer) {
 			eventContext.getEventMap().put(eventType, consumer);
 			Bukkit.getPluginManager().registerEvent(eventType, eventContext, eventPriority,
-					eventContext::eventExecute, plugin);
+					eventContext::eventExecute, GhastTools.getPlugin());
 			return this;
 		}
 

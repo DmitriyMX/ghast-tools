@@ -1,6 +1,7 @@
 package ghast;
 
 import lombok.experimental.UtilityClass;
+import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,10 +36,11 @@ public class AssetsManager {
 		saveTo(resourceName, targetPath.toPath());
 	}
 
-	public InputStream loadResource(Path pluginFolder, String resourceName, String defaultResourceName, boolean saveDefault) {
+	public InputStream loadResource(String resourceName, String defaultResourceName, boolean saveDefault) {
+		Plugin plugin = GhastTools.getPlugin();
 		InputStream inputStream;
 
-		Path pathToResource = pluginFolder.resolve(resourceName);
+		Path pathToResource = plugin.getDataFolder().toPath().resolve(resourceName);
 		if (Files.exists(pathToResource)) {
 			inputStream = openResource(pathToResource);
 		} else if (defaultResourceName != null) {
@@ -57,32 +59,16 @@ public class AssetsManager {
 		return inputStream;
 	}
 
-	public InputStream loadResource(Path pluginFolder, String resourceName, String defaultResourceName) {
-		return loadResource(pluginFolder, resourceName, defaultResourceName, true);
+	public InputStream loadResource(String resourceName, String defaultResourceName) {
+		return loadResource(resourceName, defaultResourceName, true);
 	}
 
-	public InputStream loadResource(Path pluginFolder, String resourceName, boolean saveDefault) {
-		return loadResource(pluginFolder, resourceName, resourceName, saveDefault);
+	public InputStream loadResource(String resourceName, boolean saveDefault) {
+		return loadResource(resourceName, resourceName, saveDefault);
 	}
 
-	public InputStream loadResource(Path pluginFolder, String resourceName) {
-		return loadResource(pluginFolder, resourceName, true);
-	}
-
-	public InputStream loadResource(File pluginFolder, String resourceName, String defaultResourceName, boolean saveDefault) {
-		return loadResource(pluginFolder.toPath(), resourceName, defaultResourceName, saveDefault);
-	}
-
-	public InputStream loadResource(File pluginFolder, String resourceName, String defaultResourceName) {
-		return loadResource(pluginFolder, resourceName, defaultResourceName, true);
-	}
-
-	public InputStream loadResource(File pluginFolder, String resourceName, boolean saveDefault) {
-		return loadResource(pluginFolder.toPath(), resourceName, saveDefault);
-	}
-
-	public InputStream loadResource(File pluginFolder, String resourceName) {
-		return loadResource(pluginFolder, resourceName, true);
+	public InputStream loadResource(String resourceName) {
+		return loadResource(resourceName, resourceName, true);
 	}
 
 	private URL getResourceUrl(String resourceName) {
