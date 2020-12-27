@@ -5,8 +5,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.ref.WeakReference;
 
 @UtilityClass
@@ -30,8 +29,8 @@ public class GhastTools {
 			getPlugin().saveDefaultConfig();
 		}
 
-		try (InputStream inputStream = AssetsManager.loadResource("config.yml", saveDefault)) {
-			return YamlConfiguration.loadConfiguration(new InputStreamReader(inputStream));
+		try (Reader reader = AssetsManager.getAsReader("config.yml", saveDefault)) {
+			return YamlConfiguration.loadConfiguration(reader);
 		} catch (IOException e) {
 			throw new RuntimeException("Error load config: " + e.getMessage(), e);
 		}
