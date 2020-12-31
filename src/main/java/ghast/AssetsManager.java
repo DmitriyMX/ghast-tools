@@ -136,6 +136,7 @@ public class AssetsManager {
 				while ((count = inputStream.read(buffer)) != -1) {
 					outputStream.write(buffer, 0, count);
 				}
+				outputStream.flush();
 			}
 		} catch (IOException e) {
 			throw new AssetsException(format("Error save asset \"{0}\" to \"{1}\": {2}",
