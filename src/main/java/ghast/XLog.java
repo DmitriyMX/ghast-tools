@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import static java.text.MessageFormat.format;
 
 @UtilityClass
+@SuppressWarnings("unused")
 public class XLog {
 
 	//region Debug
