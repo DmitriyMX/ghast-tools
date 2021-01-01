@@ -1,5 +1,7 @@
 package ghast;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.experimental.UtilityClass;
@@ -16,33 +18,57 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class I18n {
 
-	private final Map<String, String> messagesMap = new HashMap<>();
+	private final String DEFAULT_LANG = "en";
+	private final Table<String/*Lang*/, String/*Key*/, String/*Template|Message*/> messagesMap = HashBasedTable.create();
 
+	//region Load messages
 	@SuppressWarnings("java:S112")
-	public void loadMessages(Reader reader) {
+	public void loadMessages(String lang, Reader reader) {
+		Map<String, String> map = messagesMap.row(lang.toLowerCase());
+
 		try {
 			BufferedReader bufferedReader = new BufferedReader(reader);
 			String line;
 			while ((line = bufferedReader.readLine()) != null) {
 				String[] split = line.split("=", 2);
-				messagesMap.put(split[0].trim(), split[1].trim());
+				map.put(split[0].trim().toLowerCase(), split[1].trim());
 			}
 		} catch (IOException e) {
 			throw new RuntimeException("Error load messages: " + e.getMessage(), e);
 		}
 	}
 
+	public void loadMessages(String lang, Map<String, String> messages) {
+		Map<String, String> map = messagesMap.row(lang.toLowerCase());
+		messages.forEach((k, v) -> map.put(k.toLowerCase(), v));
+	}
+
+	public void loadMessages(Reader reader) {
+		loadMessages(DEFAULT_LANG, reader);
+	}
+
 	public void loadMessages(Map<String, String> messages) {
-		messagesMap.putAll(messages);
+		loadMessages(DEFAULT_LANG, messages);
+	}
+	//endregion
+
+	//region Get message
+	public String get(String lang, String key) {
+		return messagesMap.row(lang.toLowerCase()).getOrDefault(key.toLowerCase(), StringUtils.EMPTY);
 	}
 
-	public String getMessage(String key) {
-		return messagesMap.getOrDefault(key, StringUtils.EMPTY);
+	public String get(String lang, String key, Map<String, Object> params) {
+		return StringSubstitutor.replace(get(lang, key.toLowerCase()), params, "{", "}");
 	}
 
-	public String getMessage(String key, Map<String, Object> params) {
-		return StringSubstitutor.replace(getMessage(key), params, "{", "}");
+	public String get(String key) {
+		return get(DEFAULT_LANG, key);
 	}
+
+	public String get(String key, Map<String, Object> params) {
+		return get(DEFAULT_LANG, key, params);
+	}
+	//endregion
 
 	public ParamBuilder paramBuilder() {
 		return new ParamBuilder();
