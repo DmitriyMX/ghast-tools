@@ -15,6 +15,10 @@ public class CommandManager {
 		return new Builder(name);
 	}
 
+	public void register(String name, CommandExecuter executer) {
+		create(name).executer(executer).register();
+	}
+
 	@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class Builder {
 
