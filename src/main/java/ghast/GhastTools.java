@@ -24,6 +24,20 @@ public class GhastTools {
 	}
 
 	@SuppressWarnings("java:S112")
+	public Plugin getPlugin() {
+		if (refPlugin == null) {
+			throw new RuntimeException("Plugin not set.");
+		}
+
+		Plugin plugin = refPlugin.get();
+		if (plugin == null) {
+			throw new RuntimeException("Plugin not set.");
+		}
+
+		return plugin;
+	}
+
+	@SuppressWarnings("java:S112")
 	public YamlConfiguration loadConfig(boolean saveDefault) {
 		if (saveDefault) {
 			getPlugin().saveDefaultConfig();
@@ -38,19 +52,5 @@ public class GhastTools {
 
 	public YamlConfiguration loadConfig() {
 		return loadConfig(true);
-	}
-
-	@SuppressWarnings("java:S112")
-	Plugin getPlugin() {
-		if (refPlugin == null) {
-			throw new RuntimeException("Plugin not set.");
-		}
-
-		Plugin plugin = refPlugin.get();
-		if (plugin == null) {
-			throw new RuntimeException("Plugin not set.");
-		}
-
-		return plugin;
 	}
 }
