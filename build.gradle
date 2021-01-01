@@ -24,6 +24,7 @@ ext {
                     'commons-lang:commons-lang',
                     'org.yaml:snakeyaml'
             ]],
+            commons_text: 'org.apache.commons:commons-text:1.9',
             lombok: 'org.projectlombok:lombok:1.18.12'
     ]
 }
@@ -42,4 +43,5 @@ dependencies {
     annotationProcessor libs.lombok
 
     compileOnly2 libs.bukkit
+    implementation libs.commons_text
 }
