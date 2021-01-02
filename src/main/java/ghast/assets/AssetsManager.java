@@ -1,5 +1,6 @@
-package ghast;
+package ghast.assets;
 
+import ghast.GhastTools;
 import lombok.experimental.UtilityClass;
 import org.bukkit.plugin.Plugin;
 

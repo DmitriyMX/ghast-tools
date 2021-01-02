@@ -18,6 +18,8 @@ repositories {
 }
 
 ext {
+    junitVersion = '5.5.2'
+
     libs = [
             bukkit: [lib: 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT', exclude: [
                     'com.google.code.gson:gson',
@@ -27,7 +29,17 @@ ext {
             ]],
             commons_text: 'org.apache.commons:commons-text:1.9',
             lombok: 'org.projectlombok:lombok:1.18.12',
-            reflection_object: 'ru.dmitriymx:reflection-object:1.0-BETA'
+            reflection_object: 'ru.dmitriymx:reflection-object:1.0-BETA',
+            mysql: 'mysql:mysql-connector-java:8.0.22',
+            test: [
+                    junit5: [
+                            "org.junit.jupiter:junit-jupiter-api:$junitVersion",
+                            "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+                    ],
+                    mock: ['org.mockito:mockito-core:1.10.19'],
+                    h2db: 'com.h2database:h2:1.4.200'
+            ]
+
     ]
 }
 
@@ -40,11 +52,30 @@ def compileOnly2(library) {
     }
 }
 
+def testImplementation2(library) {
+    dependencies.testImplementation library.lib, {
+        library.exclude.each { String excludeLibStr ->
+            String[] excludeLib = excludeLibStr.split(':')
+            exclude group: excludeLib[0], module: excludeLib[1]
+        }
+    }
+}
+
 dependencies {
     compileOnly libs.lombok
     annotationProcessor libs.lombok
 
     compileOnly2 libs.bukkit
+    compileOnly libs.mysql
     implementation libs.commons_text
     implementation libs.reflection_object
+
+    testImplementation libs.test.junit5
+    testImplementation libs.test.mock
+    testImplementation2 libs.bukkit
+    testImplementation libs.test.h2db
+}
+
+test {
+    useJUnitPlatform()
 }
