@@ -1,5 +1,6 @@
 package ghast;
 
+import ghast.assets.AssetsManager;
 import lombok.experimental.UtilityClass;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;

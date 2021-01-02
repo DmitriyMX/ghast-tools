@@ -1,4 +1,4 @@
-package ghast;
+package ghast.assets;
 
 public class AssetsException extends RuntimeException {
 
