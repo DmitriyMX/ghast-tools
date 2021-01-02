@@ -1,6 +1,7 @@
-package ghast;
+package ghast.scheduler;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import ghast.GhastTools;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.experimental.UtilityClass;
