@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.concurrent.*;
 
@@ -47,7 +46,7 @@ public class ScheduleManager {
 			return this;
 		}
 
-		public ScheduleTask execute(Runnable runnable) {
+		public ScheduleTask create(Runnable runnable) {
 			if (useBukkitScheduler) {
 				return createBukkitSchedule(runnable);
 			} else {
@@ -55,23 +54,27 @@ public class ScheduleManager {
 			}
 		}
 
+		public ScheduleTask execute(Runnable runnable) {
+			ScheduleTask scheduleTask = create(runnable);
+			scheduleTask.start();
+			return scheduleTask;
+		}
+
 		private ScheduleTask createBukkitSchedule(Runnable runnable) {
 			BukkitScheduler bukkitScheduler = Bukkit.getScheduler();
 			BukkitScheduleTask resultTask;
 
 			if (this.afterMs == null && this.everyMs == null) {
-				BukkitTask bukkitTask = bukkitScheduler.runTask(GhastTools.getPlugin(), runnable);
-				resultTask = new BukkitScheduleTask(bukkitTask);
+				resultTask = new BukkitScheduleTask(() -> bukkitScheduler.runTask(GhastTools.getPlugin(), runnable));
 			} else if (this.everyMs != null) {
 				long everyTicks = this.everyMs / MS_PER_ONE_TICK;
 				long afterTicks = this.afterMs != null ? this.afterMs / MS_PER_ONE_TICK : 0;
-				BukkitTask bukkitTask = bukkitScheduler.runTaskTimer(GhastTools.getPlugin(), runnable, afterTicks,
-						everyTicks);
-				resultTask = new BukkitScheduleTask(bukkitTask);
+				resultTask = new BukkitScheduleTask(() ->
+						bukkitScheduler.runTaskTimer(GhastTools.getPlugin(), runnable, afterTicks, everyTicks));
 			} else {
 				long ticks = this.afterMs / MS_PER_ONE_TICK;
-				BukkitTask bukkitTask = bukkitScheduler.runTaskLater(GhastTools.getPlugin(), runnable, ticks);
-				resultTask = new BukkitScheduleTask(bukkitTask);
+				resultTask = new BukkitScheduleTask(() ->
+						bukkitScheduler.runTaskLater(GhastTools.getPlugin(), runnable, ticks));
 			}
 
 			return resultTask;
@@ -83,24 +86,23 @@ public class ScheduleManager {
 
 			if (this.afterMs == null && this.everyMs == null) {
 				executorService = Executors.newSingleThreadExecutor(THREAD_FACTORY);
-				Future<?> future = executorService.submit(runnable);
-				resultTask = new JavaScheduleTask(future);
+				resultTask = new JavaScheduleTask(() -> executorService.submit(runnable));
 			} else if (this.everyMs != null) {
 				ScheduledExecutorService scheduledExecutorService
 						= Executors.newScheduledThreadPool(1, THREAD_FACTORY);
-				ScheduledFuture<?> scheduledFuture = scheduledExecutorService.scheduleAtFixedRate(runnable,
-						this.afterMs != null ? this.afterMs : 0,
-						everyMs, TimeUnit.MILLISECONDS);
 
-				resultTask = new JavaScheduleTask(scheduledFuture);
+				resultTask = new JavaScheduleTask(() ->
+						scheduledExecutorService.scheduleAtFixedRate(runnable,
+								this.afterMs != null ? this.afterMs : 0,
+								everyMs, TimeUnit.MILLISECONDS));
+
 				executorService = scheduledExecutorService;
 			} else {
 				ScheduledExecutorService scheduledExecutorService
 						= Executors.newScheduledThreadPool(1, THREAD_FACTORY);
-				ScheduledFuture<?> schedule = scheduledExecutorService
-						.schedule(runnable, afterMs, TimeUnit.MILLISECONDS);
 
-				resultTask = new JavaScheduleTask(schedule);
+				resultTask = new JavaScheduleTask(() ->
+						scheduledExecutorService.schedule(runnable, afterMs, TimeUnit.MILLISECONDS));
 				executorService = scheduledExecutorService;
 			}
 
