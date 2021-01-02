@@ -33,7 +33,7 @@ public class JdbcTemplate implements JdbcOperations {
 			statement = connection.createStatement();
 			statement.execute(sql);
 		} catch (SQLException e) {
-			XLog.error("Error execute SQL: {0}", e.getMessage(), e);
+			throw new DataAccessException("Error execute SQL", sql, e);
 		} finally {
 			closeStatement(statement);
 			closeConnection(connection);
@@ -52,8 +52,7 @@ public class JdbcTemplate implements JdbcOperations {
 			resultSet = statement.executeQuery(sql);
 			return rse.extractData(resultSet);
 		} catch (SQLException e) {
-			XLog.error("Error execute SQL: {0}", e.getMessage(), e);
-			return null;
+			throw new DataAccessException("Error execute SQL", sql, e);
 		} finally {
 			closeResultSet(resultSet);
 			closeStatement(statement);
