@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.concurrent.*;
 
@@ -46,48 +47,65 @@ public class ScheduleManager {
 			return this;
 		}
 
-		public void execute(Runnable runnable) {
+		public ScheduleTask execute(Runnable runnable) {
 			if (useBukkitScheduler) {
-				createBukkitSchedule(runnable);
+				return createBukkitSchedule(runnable);
 			} else {
-				createSchedule(runnable);
+				return createSchedule(runnable);
 			}
 		}
 
-		private void createBukkitSchedule(Runnable runnable) {
+		private ScheduleTask createBukkitSchedule(Runnable runnable) {
 			BukkitScheduler bukkitScheduler = Bukkit.getScheduler();
+			BukkitScheduleTask resultTask;
 
 			if (this.afterMs == null && this.everyMs == null) {
-				bukkitScheduler.runTask(GhastTools.getPlugin(), runnable);
+				BukkitTask bukkitTask = bukkitScheduler.runTask(GhastTools.getPlugin(), runnable);
+				resultTask = new BukkitScheduleTask(bukkitTask);
 			} else if (this.everyMs != null) {
 				long everyTicks = this.everyMs / MS_PER_ONE_TICK;
 				long afterTicks = this.afterMs != null ? this.afterMs / MS_PER_ONE_TICK : 0;
-				bukkitScheduler.runTaskTimer(GhastTools.getPlugin(), runnable, afterTicks, everyTicks);
+				BukkitTask bukkitTask = bukkitScheduler.runTaskTimer(GhastTools.getPlugin(), runnable, afterTicks,
+						everyTicks);
+				resultTask = new BukkitScheduleTask(bukkitTask);
 			} else {
 				long ticks = this.afterMs / MS_PER_ONE_TICK;
-				bukkitScheduler.runTaskLater(GhastTools.getPlugin(), runnable, ticks);
+				BukkitTask bukkitTask = bukkitScheduler.runTaskLater(GhastTools.getPlugin(), runnable, ticks);
+				resultTask = new BukkitScheduleTask(bukkitTask);
 			}
+
+			return resultTask;
 		}
 
-		private void createSchedule(Runnable runnable) {
+		private ScheduleTask createSchedule(Runnable runnable) {
 			ExecutorService executorService;
+			JavaScheduleTask resultTask;
 
 			if (this.afterMs == null && this.everyMs == null) {
 				executorService = Executors.newSingleThreadExecutor(THREAD_FACTORY);
-				executorService.execute(runnable);
+				Future<?> future = executorService.submit(runnable);
+				resultTask = new JavaScheduleTask(future);
 			} else if (this.everyMs != null) {
-				ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1, THREAD_FACTORY);
-				scheduledExecutorService.scheduleAtFixedRate(runnable,
+				ScheduledExecutorService scheduledExecutorService
+						= Executors.newScheduledThreadPool(1, THREAD_FACTORY);
+				ScheduledFuture<?> scheduledFuture = scheduledExecutorService.scheduleAtFixedRate(runnable,
 						this.afterMs != null ? this.afterMs : 0,
 						everyMs, TimeUnit.MILLISECONDS);
+
+				resultTask = new JavaScheduleTask(scheduledFuture);
 				executorService = scheduledExecutorService;
 			} else {
-				ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1, THREAD_FACTORY);
-				scheduledExecutorService.schedule(runnable, afterMs, TimeUnit.MILLISECONDS);
+				ScheduledExecutorService scheduledExecutorService
+						= Executors.newScheduledThreadPool(1, THREAD_FACTORY);
+				ScheduledFuture<?> schedule = scheduledExecutorService
+						.schedule(runnable, afterMs, TimeUnit.MILLISECONDS);
+
+				resultTask = new JavaScheduleTask(schedule);
 				executorService = scheduledExecutorService;
 			}
 
 			executorService.shutdown();
+			return resultTask;
 		}
 	}
 }
