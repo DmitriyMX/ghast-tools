@@ -84,7 +84,7 @@ class JdbcTemplateTest {
 	}
 
 	@Test
-	void testQuery_Single() {
+	void testQuery_Simple_Single() {
 		String sql = MessageFormat.format("SELECT {2} FROM {0} WHERE {1} LIKE ''{3}''",
 				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, DATA[0][0]);
 
@@ -100,44 +100,30 @@ class JdbcTemplateTest {
 	}
 
 	@Test
-	void testQuery_List() {
+	void testQuery_Simple_List() {
 		String sql = MessageFormat.format("SELECT {2} FROM {0} WHERE {1} LIKE ''{3}'' OR {1} LIKE ''{4}''",
 				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, DATA[0][0], DATA[1][0]);
 
-		List<Integer> listValues = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt(1));
+		List<Integer> listValues = jdbcTemplate.queryList(sql, (rs, rowNum) -> rs.getInt(1));
 
 		assertIterableEquals(Lists.newArrayList(DATA[0][1], DATA[1][1]), listValues);
 	}
 
 	@Test
-	void testQueryForObject() {
-		class Player {
-			String name;
-			int value;
-
-			@Override
-			public boolean equals(Object o) {
-				if (this == o) return true;
-				if (!(o instanceof Player)) return false;
-				Player player = (Player) o;
-				return new EqualsBuilder().append(value, player.value).append(name, player.name).isEquals();
-			}
-
-			@Override
-			public int hashCode() {
-				return new HashCodeBuilder(17, 37).append(name).append(value).toHashCode();
-			}
-		}
-
+	void testQuery_Object_Single() {
 		String sql = MessageFormat.format("SELECT {1}, {2} FROM {0} WHERE {1} LIKE ''{3}''",
 				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, DATA[0][0]);
 
-		Player actualPlayer = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
-			Player player0 = new Player();
-			player0.name = rs.getString(COLUMN_NAME);
-			player0.value = rs.getInt(COLUMN_VALUE);
+		Player actualPlayer = jdbcTemplate.query(sql, rs -> {
+			if (rs.next()) {
+				Player player0 = new Player();
+				player0.name = rs.getString(COLUMN_NAME);
+				player0.value = rs.getInt(COLUMN_VALUE);
 
-			return player0;
+				return player0;
+			} else {
+				return null;
+			}
 		});
 
 		Player expectedPlayer = new Player();
@@ -145,6 +131,34 @@ class JdbcTemplateTest {
 		expectedPlayer.value = (int) DATA[0][1];
 
 		assertEquals(expectedPlayer, actualPlayer);
+	}
+
+	@Test
+	void testQuery_Object_List() {
+		String sql = MessageFormat.format("SELECT {1}, {2} FROM {0}",
+				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE);
+
+		List<Player> actualPlayers = jdbcTemplate.queryList(sql, (rs, num) -> {
+			Player player0 = new Player();
+			player0.name = rs.getString(COLUMN_NAME);
+			player0.value = rs.getInt(COLUMN_VALUE);
+
+			return player0;
+		});
+
+
+		List<Player> expectedPlayers = Stream.of(DATA)
+				.map(datum -> {
+					Player player1 = new Player();
+					player1.name = (String) datum[0];
+					player1.value = (int) datum[1];
+
+					return player1;
+				})
+				.collect(Collectors.toList());
+
+
+		assertIterableEquals(expectedPlayers, actualPlayers);
 	}
 
 	@Test
@@ -162,11 +176,11 @@ class JdbcTemplateTest {
 	}
 
 	@Test
-	void testQueryForList() {
+	void testQueryForMapList() {
 		String sql = MessageFormat.format("SELECT {1}, {2} FROM {0}",
 				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE);
 
-		List<Map<String, Object>> actualMapList = jdbcTemplate.queryForList(sql);
+		List<Map<String, Object>> actualMapList = jdbcTemplate.queryForMapList(sql);
 
 		List<Map<String, Object>> expectedMapList = Stream.of(DATA)
 				.map(datum -> ImmutableMap.of(COLUMN_NAME, datum[0], COLUMN_VALUE, datum[1]))
@@ -209,6 +223,24 @@ class JdbcTemplateTest {
 
 	private void dropTable() {
 		jdbcTemplate.execute("DROP TABLE IF EXISTS " + TABLE_NAME);
+	}
+
+	class Player {
+		String name;
+		int value;
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (!(o instanceof Player)) return false;
+			Player player = (Player) o;
+			return new EqualsBuilder().append(value, player.value).append(name, player.name).isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37).append(name).append(value).toHashCode();
+		}
 	}
 
 	@Nested

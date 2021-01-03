@@ -6,17 +6,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.sql.DataSource;
+import java.sql.Date;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @NoArgsConstructor
 @Getter
 @Setter
 public class JdbcTemplate implements JdbcOperations {
 
+	private static final String DBG_SQL_INFO = "Execute SQL: {0}";
 	private DataSource dataSource;
 
 	public JdbcTemplate(DataSource dataSource) {
@@ -25,7 +24,7 @@ public class JdbcTemplate implements JdbcOperations {
 
 	@Override
 	public void execute(String sql) throws DataAccessException {
-		XLog.debug("Execute SQL: {0}", sql);
+		XLog.debug(DBG_SQL_INFO, sql);
 
 		Connection connection = openConnection();
 		Statement statement = null;
@@ -42,7 +41,7 @@ public class JdbcTemplate implements JdbcOperations {
 
 	@Override
 	public <T> T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException {
-		XLog.debug("Execute SQL: {0}", sql);
+		XLog.debug(DBG_SQL_INFO, sql);
 
 		Connection connection = openConnection();
 		Statement statement = null;
@@ -61,71 +60,63 @@ public class JdbcTemplate implements JdbcOperations {
 	}
 
 	@Override
-	public <T> List<T> query(String sql, final RowMapper<T> rowMapper) throws DataAccessException {
+	public <T> List<T> queryList(String sql, final RowMapper<T> rowMapper) throws DataAccessException {
 		return query(sql, rs -> {
-			List<T> resultList = new ArrayList<>();
+			List<T> resultList;
 			int rowNum = 0;
-			while (rs.next()) {
-				resultList.add(rowMapper.mapRow(rs, rowNum++));
+			if (rs.next()) {
+				resultList = new ArrayList<>();
+
+				do {
+					resultList.add(rowMapper.mapRow(rs, rowNum++));
+				} while (rs.next());
+			} else {
+				resultList = Collections.emptyList();
 			}
+
 			return resultList;
 		});
 	}
 
 	@Override
-	public <T> T queryForObject(String sql, RowMapper<T> rowMapper) throws DataAccessException {
+	public Map<String, Object> queryForMap(String sql) throws DataAccessException {
 		return query(sql, rs -> {
 			if (rs.next()) {
-				T resultObj = rowMapper.mapRow(rs, 0);
+				ResultSetMetaData metaData = rs.getMetaData();
+				int columnCount = metaData.getColumnCount();
 
-				if (rs.next()) {
-					throw new IncorrectResultSizeDataAccessException(1);
-				}
-
-				return resultObj;
+				return rowToMap(columnCount, metaData, rs);
 			} else {
-				throw new EmptyResultDataAccessException(1);
+				return Collections.emptyMap();
 			}
 		});
 	}
 
 	@Override
-	public Map<String, Object> queryForMap(String sql) throws DataAccessException {
-		return queryForObject(sql, (rs, rowNum) -> {
-			ResultSetMetaData metaData = rs.getMetaData();
-			int columnCount = metaData.getColumnCount();
-			Map<String, Object> resultMap = new LinkedHashMap<>(columnCount);
+	public List<Map<String, Object>> queryForMapList(String sql) throws DataAccessException {
+		return query(sql, rs -> {
+			List<Map<String, Object>> resultList;
 
-			for (int i = 1; i <= columnCount; i++) {
-				String key = lookupColumnName(metaData, i);
-				Object value = getResultSetRawValue(rs, i);
-				resultMap.put(key, value);
+			if (rs.next()) {
+				resultList = new ArrayList<>();
+
+				ResultSetMetaData metaData = rs.getMetaData();
+				int columnCount = metaData.getColumnCount();
+
+				do {
+					resultList.add(rowToMap(columnCount, metaData, rs));
+				} while (rs.next());
+			} else {
+				resultList = Collections.emptyList();
 			}
 
-			return resultMap;
-		});
-	}
-
-	@Override
-	public List<Map<String, Object>> queryForList(String sql) throws DataAccessException {
-		return query(sql, (rs, rowNum) -> {
-			ResultSetMetaData metaData = rs.getMetaData();
-			int columnCount = metaData.getColumnCount();
-			Map<String, Object> resultMap = new LinkedHashMap<>(columnCount);
-
-			for (int i = 1; i <= columnCount; i++) {
-				String key = lookupColumnName(metaData, i);
-				Object value = getResultSetRawValue(rs, i);
-				resultMap.put(key, value);
-			}
-
-			return resultMap;
+			return resultList;
 		});
 	}
 
 	@Override
 	public int update(String sql) throws DataAccessException {
-		XLog.debug("Execute SQL: {0}", sql);
+		XLog.debug(DBG_SQL_INFO, sql);
 
 		Connection connection = openConnection();
 		Statement statement = null;
@@ -143,16 +134,10 @@ public class JdbcTemplate implements JdbcOperations {
 		}
 	}
 
-	@Override
-	public int delete(String sql) throws DataAccessException {
-		return update(sql);
-	}
-
 	private Connection openConnection() {
 		try {
 			return getDataSource().getConnection();
-		}
-		catch (SQLException ex) {
+		} catch (SQLException ex) {
 			throw new CannotGetJdbcConnectionException("Could not get JDBC Connection", ex);
 		}
 	}
@@ -165,12 +150,25 @@ public class JdbcTemplate implements JdbcOperations {
 		return name;
 	}
 
+	private Map<String, Object> rowToMap(int columnCount, ResultSetMetaData metaData, ResultSet rs) throws SQLException {
+		Map<String, Object> rowMap = new LinkedHashMap<>(columnCount);
+
+		for (int i = 1; i <= columnCount; i++) {
+			String key = lookupColumnName(metaData, i);
+			Object value = getResultSetRawValue(rs, i);
+			rowMap.put(key, value);
+		}
+
+		return rowMap;
+	}
+
 	private Object getResultSetRawValue(ResultSet resultSet, int index) throws SQLException {
 		Object obj = resultSet.getObject(index);
-		String className = null;
-		if (obj != null) {
-			className = obj.getClass().getName();
+		if (obj == null) {
+			return null;
 		}
+
+		String className = obj.getClass().getName();
 
 		if (obj instanceof Blob) {
 			Blob blob = (Blob) obj;
@@ -180,18 +178,16 @@ public class JdbcTemplate implements JdbcOperations {
 			obj = clob.getSubString(1, (int) clob.length());
 		} else if ("oracle.sql.TIMESTAMP".equals(className) || "oracle.sql.TIMESTAMPTZ".equals(className)) {
 			obj = resultSet.getTimestamp(index);
-		} else if (className != null && className.startsWith("oracle.sql.DATE")) {
+		} else if (className.startsWith("oracle.sql.DATE")) {
 			String metaDataClassName = resultSet.getMetaData().getColumnClassName(index);
 			if ("java.sql.Timestamp".equals(metaDataClassName) || "oracle.sql.TIMESTAMP".equals(metaDataClassName)) {
 				obj = resultSet.getTimestamp(index);
-			}
-			else {
+			} else {
 				obj = resultSet.getDate(index);
 			}
-		} else if (obj instanceof Date) {
-			if ("java.sql.Timestamp".equals(resultSet.getMetaData().getColumnClassName(index))) {
-				obj = resultSet.getTimestamp(index);
-			}
+		} else if (obj instanceof Date
+				&& "java.sql.Timestamp".equals(resultSet.getMetaData().getColumnClassName(index))) {
+			obj = resultSet.getTimestamp(index);
 		}
 
 		return obj;
