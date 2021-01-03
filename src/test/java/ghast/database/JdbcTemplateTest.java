@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -97,6 +98,17 @@ class JdbcTemplateTest {
 		});
 
 		assertEquals(DATA[0][1], value);
+	}
+
+	@Test
+	void testQuery_Simple_Optional() {
+		String sql = MessageFormat.format("SELECT {2} FROM {0} WHERE {1} LIKE ''{3}''",
+				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, DATA[0][0]);
+
+		Optional<Integer> optValue = jdbcTemplate.queryOne(sql, rs -> rs.getInt(1));
+
+		assertTrue(optValue.isPresent());
+		assertEquals(DATA[0][1], optValue.get());
 	}
 
 	@Test

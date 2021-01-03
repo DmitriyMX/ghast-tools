@@ -60,6 +60,17 @@ public class JdbcTemplate implements JdbcOperations {
 	}
 
 	@Override
+	public <T> Optional<T> queryOne(String sql, ResultSetExtractor<T> rse) throws DataAccessException {
+		return query(sql, rs -> {
+			if (rs.next()) {
+				return Optional.ofNullable(rse.extractData(rs));
+			} else {
+				return Optional.empty();
+			}
+		});
+	}
+
+	@Override
 	public <T> List<T> queryList(String sql, final RowMapper<T> rowMapper) throws DataAccessException {
 		return query(sql, rs -> {
 			List<T> resultList;
