@@ -8,15 +8,6 @@ public class DataAccessException extends RuntimeException {
 
 	private String sql;
 
-	public DataAccessException(String msg) {
-		super(msg);
-	}
-
-	public DataAccessException(String msg, String sql) {
-		this(msg);
-		this.sql = sql;
-	}
-
 	public DataAccessException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
