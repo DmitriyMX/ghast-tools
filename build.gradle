@@ -30,7 +30,6 @@ ext {
             commons_text: 'org.apache.commons:commons-text:1.9',
             lombok: 'org.projectlombok:lombok:1.18.12',
             reflection_object: 'ru.dmitriymx:reflection-object:1.0-BETA',
-            mysql: 'mysql:mysql-connector-java:8.0.22',
             test: [
                     junit5: [
                             "org.junit.jupiter:junit-jupiter-api:$junitVersion",
@@ -66,7 +65,6 @@ dependencies {
     annotationProcessor libs.lombok
 
     compileOnly2 libs.bukkit
-    compileOnly libs.mysql
     implementation libs.commons_text
     implementation libs.reflection_object
 
