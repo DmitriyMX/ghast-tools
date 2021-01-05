@@ -8,7 +8,7 @@ _Основан на версии Bukkit API 1.12._
 
 ---
 
-1. [Перед использованием](#перед_использованием)
+1. [Перед использованием](#перед-использованием)
 2. [GhastTools](#ghasttools) 
 3. [AssetsManager](#assetsmanager) 
 4. [BuildHelper](#buildhelper) 
