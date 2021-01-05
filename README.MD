@@ -592,7 +592,9 @@ XLog.info("Player {0} join game", event.getPlayer().getName());
 
 XLog.error("ERROR!", exception);
 XLog.error("ERROR: {0}", exception.getMessage());
-XLog.error("ERROR {0} in Event {1}: {2}", exception.getClass(), event.getClass(), exception.getMessage());
+// Для экранирования "{" нужно перед ней поставить "'".
+// А для использования "'" нужно их дублировать.
+XLog.error("ERROR ''{0}'' in Event '{{1}'}: {2}", exception.getClass(), event.getClass(), exception.getMessage());
 XLog.error("ERROR: {0}", exception.getMessage(), exception);
 ```
 
