@@ -6,20 +6,24 @@
 Набор вспомогательных инструментов для Bukkit API.  
 _Основан на версии Bukkit API 1.12._
 
----
+## Содержание
 
 1. [Перед использованием](#перед-использованием)
-2. [GhastTools](#ghasttools) 
-3. [AssetsManager](#assetsmanager) 
-4. [BuildHelper](#buildhelper) 
-5. [CommandManager](#commandmanager) 
-6. [EffectsHelper](#effectshelper) 
-7. [EventContext](#eventcontext) 
-8. [JdbcTemplate](#jdbctemplate) 
-9. [ScheduleManager](#schedulemanager) 
-10. [ScheduleTask](#scheduletask) 
-11. [I18n](#i18n) 
-12. [XLog](#xlog) 
+2. [GhastTools](#ghasttools)
+3. [AssetsManager](#assetsmanager)
+4. [BuildHelper](#buildhelper)
+5. [CommandManager](#commandmanager)
+6. [EffectsHelper](#effectshelper)
+7. [EventContext](#eventcontext)
+8. [JdbcTemplate](#jdbctemplate)
+9. [ScheduleManager](#schedulemanager)
+10. [ScheduleTask](#scheduletask)
+11. [I18n](#i18n)
+12. [XLog](#xlog)
+13. [Подключение](#подключение)
+    1. [Gradle](#gradle)
+    2. [Maven](#maven)
+
 ---
 
 ## Перед использованием
