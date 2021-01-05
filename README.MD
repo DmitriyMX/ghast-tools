@@ -491,23 +491,110 @@ scheduleTask.cancel();
 
 ## I18n
 
-TODO
+Инструмент для работы с мультиязыковыми сообщениями или просто сообщениями, которые храняться в отдельном файле.
+
+Позволяет использовать шаблонизированные сообщения вида `Привет, {player}!`.
 
 ### loadMessages
 
-TODO
+Загрузка сообщений в инструмент.
+
+Передать можно как "мапу" с перечислением ключ-сообщение, так и `Reader` на файл в формате `key=message` (как у `Properties`).
+
+```java
+Map<String, String> messagesMap = ...;
+I18n.loadMessages(messagesMap);
+```
+
+```java
+Reader reader = AssetsManager.getAsReader("messages.properties");
+I18n.loadMessages(reader);
+```
+
+В первом параметре можно указать код языка, для которого загружаются сообщения. По-умолчанию будет "en".
+
+```java
+Map<String, String> enMessagesMap = ...;
+Map<String, String> ruMessagesMap = ...;
+
+I18n.loadMessages("en", enMessagesMap);
+I18n.loadMessages("ru", ruMessagesMap);
+```
+
+```java
+Reader readerEn = AssetsManager.getAsReader("messages.properties");
+Reader readerRu = AssetsManager.getAsReader("messages.ru.properties");
+
+I18n.loadMessages("en", readerEn);
+I18n.loadMessages("ru", readerRu);
+```
 
 ### get
 
-TODO
+Получение сообщения по его ключу.  
+
+```java
+String msg = I18n.get("player.join.msg");
+```
+
+Если следующим сообщением указать `Map<String, Object>`, то можно будет воспользоваться шаблонизатором.
+
+```java
+Map<String, String> messagesMap = new HashMap<>();
+messagesMap.put("player.join.msg", "Привет, {player}!");
+
+I18n.loadMessages(messagesMap);
+
+Map<String, String> params = new HashMap<>();
+params.put("player", event.getPlayer().getName());
+
+String msg = I18n.get("player.join.msg", params);
+```
+
+Однако можно создавать `Map<String, String> params` явно, а воспользоваться [paramBuilder()](#paramBuilder)
+
+```java
+String msg = I18n.get("player.join.msg", I18n.paramBuilder()
+        .add("player", event.getPlayer().getName())
+        .build());
+```
+
+Можно первым параметром указать код языка.
+
+```java
+String msg = I18n.get("ru", "player.join.msg");
+```
 
 ### paramBuilder
 
-TODO
+Инструмент для параметизирования шаблонов сообщений.
+
+```java
+Map<String, Object> params = I18n.paramBuilder()
+        .add("player", event.getPlayer().getName())
+        .build();
+String msg = I18n.get("player.join.msg", params);
+```
 
 ## XLog
 
-TODO
+Замена станрадтному `getLogger()`, который использует `java.utils.Logger` и не всегда удобен для логирования.
+
+Имеет 4 уровня логирования: `debug`, `info`, `warning`, `error`.
+
+Сообщения могут быть шаблонизированными. Синтаксис шаблонов — `java.text.MessageFormat`.
+
+Примеры:
+
+```java
+XLog.info("Hello");
+XLog.info("Player {0} join game", event.getPlayer().getName());
+
+XLog.error("ERROR!", exception);
+XLog.error("ERROR: {0}", exception.getMessage());
+XLog.error("ERROR {0} in Event {1}: {2}", exception.getClass(), event.getClass(), exception.getMessage());
+XLog.error("ERROR: {0}", exception.getMessage(), exception);
+```
 
 ---
 
