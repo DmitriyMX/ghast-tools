@@ -578,7 +578,7 @@ String msg = I18n.get("player.join.msg", params);
 
 ## XLog
 
-Замена станрадтному `getLogger()`, который использует `java.utils.Logger` и не всегда удобен для логирования.
+Замена стандартному `getLogger()`, который использует `java.utils.Logger` и не всегда удобен для логирования.
 
 Имеет 4 уровня логирования: `debug`, `info`, `warning`, `error`.
 
