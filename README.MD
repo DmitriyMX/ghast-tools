@@ -1,9 +1,28 @@
 # GHAST TOOLS
 
+![version: 1.9](https://img.shields.io/badge/version-1.9-0a0.svg?style=flat)
+![bukkit-api: 1.12](https://img.shields.io/badge/bukkit--api-1.12-d50.svg?style=flat)
+
 Набор вспомогательных инструментов для Bukkit API.  
 _Основан на версии Bukkit API 1.12._
 
-## Использование
+---
+
+1. [Перед использованием](#перед_использованием)
+2. [GhastTools](#ghasttools) 
+3. [AssetsManager](#assetsmanager) 
+4. [BuildHelper](#buildhelper) 
+5. [CommandManager](#commandmanager) 
+6. [EffectsHelper](#effectshelper) 
+7. [EventContext](#eventcontext) 
+8. [JdbcTemplate](#jdbctemplate) 
+9. [ScheduleManager](#schedulemanager) 
+10. [ScheduleTask](#scheduletask) 
+11. [I18n](#i18n) 
+12. [XLog](#xlog) 
+---
+
+## Перед использованием
 
 Перед началом использования, необходимо в вашем Bukkit-плагине прописать подобный код:
 
@@ -17,11 +36,11 @@ void onLoad() {
 
 Все методы данного набора инструментов объеденены в классы, выполняющие роль группировщиков. 
 
-### GhastTools
+## GhastTools
 
 Методы общего назначения или без определённой группировки.
 
-#### loadConfig
+### loadConfig
 
 Загрузка файла настроек плагина - `config.yml`.
 
@@ -39,7 +58,7 @@ YamlConfiguration config = GhastTools.loadConfig(false);
 Если передать параметр `false`, то при отсутствии файла `config.yml` в папке плагина,
 будет загруден исключительно встроенный файл настроек.
 
-### AssetsManager
+## AssetsManager
 
 Методы по работе с файлами плагина (_"ассетами"_).
 
@@ -60,19 +79,19 @@ YamlConfiguration config = GhastTools.loadConfig(false);
         - если `saveDefault` равен `false`, то данные будут взяты из файлв в плагине.
     - если `defaultResourceName` равен `null`, то будет брошено исключение `AssetsException` с описанием ошибки вида "Файл X не найден".
 
-#### getAsInputStream
+### getAsInputStream
 
 ```java
 InputStream inputStream = AssetsManager.getAsInputStream("translate.ru.yml", "translate.yml", false);
 ```
 
-#### getAsReader
+### getAsReader
 
 ```java
 Reader reader = AssetsManager.getAsReader("translate.ru.yml", "translate.yml", false);
 ```
 
-#### getAsString
+### getAsString
 
 ```java
 String string = AssetsManager.getAsString("readme.txt", "readme.txt", StandardCharsets.UTF_8, false);
@@ -81,25 +100,25 @@ String string = AssetsManager.getAsString("readme.txt", "readme.txt", StandardCh
 У этой группы есть дополнительный _опциональный_ параметр - `charset` - в котором указывается кодиривка получаемой строки.  
 _По-умолчанию равен `StandardCharsets.UTF_8`_
 
-### BuildHelper
+## BuildHelper
 
 Набор методов облегчающих размецение объектов на карте.
 
-#### placeSkull
+### placeSkull
 
 ```java
 Location location = ...;
 Skull skull = BuildHelper.placeSkull(location, BlockFace.NORTH)
 ```
 
-#### placeSignWall
+### placeSignWall
 
 ```java
 Location location = ...;
 Sign signWall = BuildHelper.placeSignWall(location, BlockFace.NORTH)
 ```
 
-### CommandManager
+## CommandManager
 
 Регистрация команд.
 
@@ -118,7 +137,7 @@ CommandManager.create("start")
         .register();
 ```
 
-#### register
+### register
 
 Упрощенная регистрация команды. Указывается лишь название команды и исполнитель.
 
@@ -126,7 +145,7 @@ CommandManager.create("start")
 CommandManager.register("start", (sender, args) -> sender.sendMessage("hello!"));
 ```
 
-#### create
+### create
 
 Конструктор для подробного варианта регистрации команды.
 
@@ -134,7 +153,7 @@ CommandManager.register("start", (sender, args) -> sender.sendMessage("hello!"))
 CommandManager.Builder builder = CommandManager.create("start");
 ```
 
-#### executer
+### executer
 
 Указание исполнителя для команды
 
@@ -143,7 +162,7 @@ CommandManager.Builder builder = CommandManager.create("start")
         .executer((sender, args) -> sender.sendMessage("hello!"));
 ```
 
-#### onError
+### onError
 
 Обработчик исключений
 
@@ -155,7 +174,7 @@ CommandManager.Builder builder = CommandManager.create("start")
         });
 ```
 
-#### useOnlyPlayer
+### useOnlyPlayer
 
 Указание, что данную команду могут использовать только Игроки.
 Опционально можно указать сообщение, которое будет выводиться в консоль.  
@@ -166,7 +185,7 @@ CommandManager.Builder builder = CommandManager.create("start")
 		.useOnlyPlayer("Команду могут использовать только игроки");
 ```
 
-#### useOnlyConsole
+### useOnlyConsole
 
 Указание, что данную команду можно использовать только в консоле.
 Опционально можно указать сообщение, которое будет выводиться Игроку.  
@@ -177,7 +196,7 @@ CommandManager.Builder builder = CommandManager.create("start")
 		.useOnlyConsole(ChatColor.RED + "Команду можно использовать только в консоли");
 ```
 
-#### register
+### register
 
 Регистрация описанной в Конструкторе команды.
 
@@ -188,11 +207,11 @@ CommandManager.create("start")
         .register();
 ```
 
-### EffectsHelper
+## EffectsHelper
 
 Набор методов для работы с эффектами.
 
-#### playSound
+### playSound
 
 Воспроизвести звук.
 
@@ -201,7 +220,7 @@ Location location = ...;
 EffectsHelper.playSound(location, Sound.AMBIENT_CAVE, 1.0f);
 ```
 
-#### particle
+### particle
 
 Создание частиц.
 
@@ -210,7 +229,7 @@ Location location = ...;
 EffectsHelper.particle(location, Particle.REDSTONE, 1.0d, 1.0d, 1.0d, 1.0d, 5);
 ```
 
-### EventContext
+## EventContext
 
 Регистрация группы обработчиков событий, объединённых общим условием выполнения.
 
@@ -220,7 +239,7 @@ EventContext.create()
         .onEvent(PlayerJoinEvent.class, event -> { event.getPlayer().kickPlayer("Max players"); });
 ```
 
-#### create
+### create
 
 Создание контекста событий.
 
@@ -228,7 +247,7 @@ EventContext.create()
 EventContext eventContext = EventContext.create();
 ```
 
-#### filter
+### filter
 
 Условие, при котором будут срабатывать обработчики событий в данном контексте.
 
@@ -237,7 +256,7 @@ EventContext.create()
         .filter(() -> Bukkit.getOnlinePlayers().size() > 10)
 ```
 
-#### onEvent
+### onEvent
 
 Указание события и его обработчика.  
 _Обработчик события регистрируется сразу же._
@@ -248,7 +267,7 @@ EventContext.create()
         .onEvent(PlayerJoinEvent.class, event -> event.getPlayer().kickPlayer("Max players"));
 ```
 
-#### cancelEvent
+### cancelEvent
 
 Отменить событие.  
 _Обработчик события регистрируется сразу же._
@@ -265,7 +284,7 @@ EventContext.create()
         .onEvent(BlockPlaceEvent.class, event -> event.setCancelled(true))
 ```
 
-### JdbcTemplate
+## JdbcTemplate
 
 Инструмент для упрощения работы с SQL базами данных, работающими через JDBC.
 
@@ -288,7 +307,7 @@ dataSource.setPassword("secret");
 JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 ```
 
-#### execute
+### execute
 
 Выполнение SQL запроса без последующей обработки результатов выполнения.
 
@@ -296,7 +315,7 @@ JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 jdbcTemplate.execute("CREATE TABLE my_table (id int, name varchar(16));");
 ```
 
-#### query
+### query
 
 Выполнение SQL запроса и обработка его результатов.  
 Может возвращать любой тип объектов. 
@@ -325,7 +344,7 @@ List<String> names = jdbcTemplate.query("SELECT name FROM my_table", resultSet -
 });
 ```
 
-#### queryOne
+### queryOne
 
 Выполнение SQL запроса с расчетом, что результат будет единичным либо не будет вовсе.  
 Возвращает `Optional`.
@@ -334,7 +353,7 @@ List<String> names = jdbcTemplate.query("SELECT name FROM my_table", resultSet -
 Optional<String> optName = jdbcTemplate.queryOne("SELECT name FROM my_table WHERE name LIKE 'dmitriymx'", rs -> rs.getString("name"));
 ```
 
-#### queryList
+### queryList
 
 Выполнение SQL запроса и обработка результата как списка данных.  
 Возвращает `List`.
@@ -343,7 +362,7 @@ Optional<String> optName = jdbcTemplate.queryOne("SELECT name FROM my_table WHER
 List<String> names = jdbcTemplate.queryList("SELECT name FROM my_table", (resultSet, rowNum) -> resultSet.getString("name"));
 ```
 
-#### queryForMap
+### queryForMap
 
 Выполнение SQL запроса с расчетом, что результат будет единичным либо не будет вовсе.  
 Возвращает `Map<String, Object>`, где ключ — это наименование колонок таблицы, а значения — это значения в ячейках таблицы.
@@ -352,7 +371,7 @@ List<String> names = jdbcTemplate.queryList("SELECT name FROM my_table", (result
 Map<String, Object> map = jdbcTemplate.queryForMap("SELECT * FROM my_table LIMIT 0,1;");
 ```
 
-#### queryForMapList
+### queryForMapList
 
 Выполнение SQL запроса и обработка результата как списка данных.  
 Возвращает `List<Map<String, Object>>`, где ключ — это наименование колонок таблицы, а значения — это значения в ячейках таблицы.
@@ -361,7 +380,7 @@ Map<String, Object> map = jdbcTemplate.queryForMap("SELECT * FROM my_table LIMIT
 List<Map<String, Object>> mapList = jdbcTemplate.queryForMapList("SELECT * FROM my_table");
 ```
 
-#### update
+### update
 
 Выполнение SQL запроса где будет происходить обновление данных в таблице.
 Под "обновлением" подразумеваются любые изменения в таблице: `UPDATE`, `DELETE`, `INSERT`.  
@@ -371,11 +390,11 @@ List<Map<String, Object>> mapList = jdbcTemplate.queryForMapList("SELECT * FROM 
 int rows = jdbcTemplate.update("DELETE FROM my_table WHERE name LIKE 'dmitriymx';");
 ```
 
-### ScheduleManager
+## ScheduleManager
 
 Набор методов для создания параллельных задач, выполняющихся один раз или по рассписанию.
 
-#### createTask
+### createTask
 
 Создание конструктора задачи.
 
@@ -383,7 +402,7 @@ int rows = jdbcTemplate.update("DELETE FROM my_table WHERE name LIKE 'dmitriymx'
 ScheduleManager.Builder builder = ScheduleManager.createTask();
 ```
 
-#### useBukkitScheduler
+### useBukkitScheduler
 
 Если задача будет взаимодействоватьс **Bukkit API** или необходима привязка задачи к _тикам_,
 то необходимо использовать данный указатель.
@@ -395,7 +414,7 @@ ScheduleManager.Builder builder = ScheduleManager.createTask()
         .useBukkitScheduler();
 ```
 
-#### after
+### after
 
 Указание, что задачу нужно выполнить не сразу, а с некоторой задержкой перед запуском.
 
@@ -404,7 +423,7 @@ ScheduleManager.Builder builder = ScheduleManager.createTask()
         .after(5, TimeUnit.MINUTES);
 ```
 
-#### every
+### every
 
 Указание, что задачу нужно повторять через указанное время.
 
@@ -413,7 +432,7 @@ ScheduleManager.Builder builder = ScheduleManager.createTask()
         .every(5, TimeUnit.MINUTES);
 ```
 
-#### create
+### create
 
 Создание описанной задачи.
 
@@ -425,7 +444,7 @@ ScheduleTask scheduleTask = ScheduleManager.createTask()
 
 _Задача будет только создана. Для её выполнения нужно вызвать `scheduleTask.start()`._
 
-#### execute
+### execute
 
 Создание и выполнение описанной задачи.
 
@@ -435,11 +454,11 @@ ScheduleTask scheduleTask = ScheduleManager.createTask()
         .execute(() -> Bukkit.getServer().getLogger().info("TimeMS: " + System.currentTimeMillis()));
 ```
 
-### ScheduleTask
+## ScheduleTask
 
 Вспомогательный объект, созданный через `ScheduleManager`. Позволяет управлять созданной задачей.
 
-#### start
+### start
 
 Запускает задачу, если она еще не запущена.
 
@@ -448,7 +467,7 @@ ScheduleTask scheduleTask = ...;
 scheduleTask.start();
 ```
 
-#### isCanceled
+### isCanceled
 
 Возвращает состояние задачи. Если `true`, значит задача была или _отменена/остоновлена_ или была завершена.
 
@@ -457,7 +476,7 @@ ScheduleTask scheduleTask = ...;
 boolean status = scheduleTask.isCanceled();
 ```
 
-#### cancel
+### cancel
 
 Отменяет/Остонавливает выполнение задачи.
 
@@ -466,23 +485,23 @@ ScheduleTask scheduleTask = ...;
 scheduleTask.cancel();
 ```
 
-### I18n
+## I18n
 
 TODO
 
-#### loadMessages
+### loadMessages
 
 TODO
 
-#### get
+### get
 
 TODO
 
-#### paramBuilder
+### paramBuilder
 
 TODO
 
-### XLog
+## XLog
 
 TODO
 
