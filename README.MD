@@ -551,7 +551,7 @@ params.put("player", event.getPlayer().getName());
 String msg = I18n.get("player.join.msg", params);
 ```
 
-Однако можно создавать `Map<String, String> params` явно, а воспользоваться [paramBuilder()](#paramBuilder)
+Однако можно создавать `Map<String, String> params` явно, а воспользоваться [paramBuilder()](#parambuilder)
 
 ```java
 String msg = I18n.get("player.join.msg", I18n.paramBuilder()
