@@ -229,7 +229,7 @@ _Отменяет действие указателя `useOnlyConsole`_
 
 ```java
 CommandManager.Builder builder = CommandManager.create("start")
-		.useOnlyPlayer("Команду могут использовать только игроки");
+        .useOnlyPlayer("Команду могут использовать только игроки");
 ```
 
 ### useOnlyConsole
@@ -240,7 +240,7 @@ _Отменяет действие указателя `useOnlyPlayer`_
 
 ```java
 CommandManager.Builder builder = CommandManager.create("start")
-		.useOnlyConsole(ChatColor.RED + "Команду можно использовать только в консоли");
+        .useOnlyConsole(ChatColor.RED + "Команду можно использовать только в консоли");
 ```
 
 ### register

@@ -29,261 +29,261 @@ import static org.mockito.Mockito.when;
 
 class JdbcTemplateTest {
 
-	static final String JDBC_USER = "sa";
-	static final String JDBC_PASSWORD = "";
-	static final String JDBC_DB_NAME = "in_mem_db";
-	static final String JDBC_URL = "jdbc:h2:mem:" + JDBC_DB_NAME + ";DB_CLOSE_DELAY=-1";
+    static final String JDBC_USER = "sa";
+    static final String JDBC_PASSWORD = "";
+    static final String JDBC_DB_NAME = "in_mem_db";
+    static final String JDBC_URL = "jdbc:h2:mem:" + JDBC_DB_NAME + ";DB_CLOSE_DELAY=-1";
 
-	static final String TABLE_NAME = "TEST_TABLE";
-	static final String COLUMN_ID = "ID";
-	static final String COLUMN_NAME = "C_NAME";
-	static final String COLUMN_VALUE = "C_VALUE";
+    static final String TABLE_NAME = "TEST_TABLE";
+    static final String COLUMN_ID = "ID";
+    static final String COLUMN_NAME = "C_NAME";
+    static final String COLUMN_VALUE = "C_VALUE";
 
-	static final Object[][] DATA = new Object[][]{
-			{ "Player 1", 100 }, { "Player 2", 250 },
-			{ "Player 3", 0 }, { "Player 4", 780 }
-	};
+    static final Object[][] DATA = new Object[][]{
+            { "Player 1", 100 }, { "Player 2", 250 },
+            { "Player 3", 0 }, { "Player 4", 780 }
+    };
 
-	static DataSource dataSource;
-	JdbcTemplate jdbcTemplate;
+    static DataSource dataSource;
+    JdbcTemplate jdbcTemplate;
 
-	@BeforeAll
-	static void beforeAll() {
-		Logger logger = Logger.getLogger(JdbcTemplateTest.class.getName());
+    @BeforeAll
+    static void beforeAll() {
+        Logger logger = Logger.getLogger(JdbcTemplateTest.class.getName());
 
-		Plugin mockPlugin = mock(Plugin.class);
-		when(mockPlugin.getLogger()).thenReturn(logger);
+        Plugin mockPlugin = mock(Plugin.class);
+        when(mockPlugin.getLogger()).thenReturn(logger);
 
-		GhastTools.setPlugin(mockPlugin);
+        GhastTools.setPlugin(mockPlugin);
 
-		JdbcDataSource jdbcDataSource = new JdbcDataSource();
-		jdbcDataSource.setUser(JDBC_USER);
-		jdbcDataSource.setPassword(JDBC_PASSWORD);
-		jdbcDataSource.setURL(JDBC_URL);
+        JdbcDataSource jdbcDataSource = new JdbcDataSource();
+        jdbcDataSource.setUser(JDBC_USER);
+        jdbcDataSource.setPassword(JDBC_PASSWORD);
+        jdbcDataSource.setURL(JDBC_URL);
 
-		dataSource = jdbcDataSource;
-	}
+        dataSource = jdbcDataSource;
+    }
 
-	@BeforeEach
-	void before() {
-		jdbcTemplate = new JdbcTemplate(dataSource);
-		createTable();
+    @BeforeEach
+    void before() {
+        jdbcTemplate = new JdbcTemplate(dataSource);
+        createTable();
 
-		String sql_head = MessageFormat.format("INSERT INTO {0} ({1}, {2}) VALUES ",
-				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE);
-		StringJoiner sql_sj = new StringJoiner(", ");
-		for (Object[] datum : DATA) {
-			sql_sj.add(MessageFormat.format("( ''{0}'', {1} )", datum[0], datum[1]));
-		}
+        String sql_head = MessageFormat.format("INSERT INTO {0} ({1}, {2}) VALUES ",
+                TABLE_NAME, COLUMN_NAME, COLUMN_VALUE);
+        StringJoiner sql_sj = new StringJoiner(", ");
+        for (Object[] datum : DATA) {
+            sql_sj.add(MessageFormat.format("( ''{0}'', {1} )", datum[0], datum[1]));
+        }
 
-		jdbcTemplate.execute(sql_head + sql_sj.toString());
-	}
+        jdbcTemplate.execute(sql_head + sql_sj.toString());
+    }
 
-	@AfterEach
-	void after() {
-		dropTable();
-	}
+    @AfterEach
+    void after() {
+        dropTable();
+    }
 
-	@Test
-	void testQuery_Simple_Single() {
-		String sql = MessageFormat.format("SELECT {2} FROM {0} WHERE {1} LIKE ''{3}''",
-				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, DATA[0][0]);
+    @Test
+    void testQuery_Simple_Single() {
+        String sql = MessageFormat.format("SELECT {2} FROM {0} WHERE {1} LIKE ''{3}''",
+                TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, DATA[0][0]);
 
-		Integer value = jdbcTemplate.query(sql, rs -> {
-			if (rs.next()) {
-				return rs.getInt(1);
-			} else {
-				return null;
-			}
-		});
+        Integer value = jdbcTemplate.query(sql, rs -> {
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                return null;
+            }
+        });
 
-		assertEquals(DATA[0][1], value);
-	}
+        assertEquals(DATA[0][1], value);
+    }
 
-	@Test
-	void testQuery_Simple_Optional() {
-		String sql = MessageFormat.format("SELECT {2} FROM {0} WHERE {1} LIKE ''{3}''",
-				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, DATA[0][0]);
+    @Test
+    void testQuery_Simple_Optional() {
+        String sql = MessageFormat.format("SELECT {2} FROM {0} WHERE {1} LIKE ''{3}''",
+                TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, DATA[0][0]);
 
-		Optional<Integer> optValue = jdbcTemplate.queryOne(sql, rs -> rs.getInt(1));
+        Optional<Integer> optValue = jdbcTemplate.queryOne(sql, rs -> rs.getInt(1));
 
-		assertTrue(optValue.isPresent());
-		assertEquals(DATA[0][1], optValue.get());
-	}
+        assertTrue(optValue.isPresent());
+        assertEquals(DATA[0][1], optValue.get());
+    }
 
-	@Test
-	void testQuery_Simple_List() {
-		String sql = MessageFormat.format("SELECT {2} FROM {0} WHERE {1} LIKE ''{3}'' OR {1} LIKE ''{4}''",
-				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, DATA[0][0], DATA[1][0]);
+    @Test
+    void testQuery_Simple_List() {
+        String sql = MessageFormat.format("SELECT {2} FROM {0} WHERE {1} LIKE ''{3}'' OR {1} LIKE ''{4}''",
+                TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, DATA[0][0], DATA[1][0]);
 
-		List<Integer> listValues = jdbcTemplate.queryList(sql, (rs, rowNum) -> rs.getInt(1));
+        List<Integer> listValues = jdbcTemplate.queryList(sql, (rs, rowNum) -> rs.getInt(1));
 
-		assertIterableEquals(Lists.newArrayList(DATA[0][1], DATA[1][1]), listValues);
-	}
+        assertIterableEquals(Lists.newArrayList(DATA[0][1], DATA[1][1]), listValues);
+    }
 
-	@Test
-	void testQuery_Object_Single() {
-		String sql = MessageFormat.format("SELECT {1}, {2} FROM {0} WHERE {1} LIKE ''{3}''",
-				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, DATA[0][0]);
+    @Test
+    void testQuery_Object_Single() {
+        String sql = MessageFormat.format("SELECT {1}, {2} FROM {0} WHERE {1} LIKE ''{3}''",
+                TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, DATA[0][0]);
 
-		Player actualPlayer = jdbcTemplate.query(sql, rs -> {
-			if (rs.next()) {
-				Player player0 = new Player();
-				player0.name = rs.getString(COLUMN_NAME);
-				player0.value = rs.getInt(COLUMN_VALUE);
+        Player actualPlayer = jdbcTemplate.query(sql, rs -> {
+            if (rs.next()) {
+                Player player0 = new Player();
+                player0.name = rs.getString(COLUMN_NAME);
+                player0.value = rs.getInt(COLUMN_VALUE);
 
-				return player0;
-			} else {
-				return null;
-			}
-		});
+                return player0;
+            } else {
+                return null;
+            }
+        });
 
-		Player expectedPlayer = new Player();
-		expectedPlayer.name = (String) DATA[0][0];
-		expectedPlayer.value = (int) DATA[0][1];
+        Player expectedPlayer = new Player();
+        expectedPlayer.name = (String) DATA[0][0];
+        expectedPlayer.value = (int) DATA[0][1];
 
-		assertEquals(expectedPlayer, actualPlayer);
-	}
+        assertEquals(expectedPlayer, actualPlayer);
+    }
 
-	@Test
-	void testQuery_Object_List() {
-		String sql = MessageFormat.format("SELECT {1}, {2} FROM {0}",
-				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE);
+    @Test
+    void testQuery_Object_List() {
+        String sql = MessageFormat.format("SELECT {1}, {2} FROM {0}",
+                TABLE_NAME, COLUMN_NAME, COLUMN_VALUE);
 
-		List<Player> actualPlayers = jdbcTemplate.queryList(sql, (rs, num) -> {
-			Player player0 = new Player();
-			player0.name = rs.getString(COLUMN_NAME);
-			player0.value = rs.getInt(COLUMN_VALUE);
+        List<Player> actualPlayers = jdbcTemplate.queryList(sql, (rs, num) -> {
+            Player player0 = new Player();
+            player0.name = rs.getString(COLUMN_NAME);
+            player0.value = rs.getInt(COLUMN_VALUE);
 
-			return player0;
-		});
-
-
-		List<Player> expectedPlayers = Stream.of(DATA)
-				.map(datum -> {
-					Player player1 = new Player();
-					player1.name = (String) datum[0];
-					player1.value = (int) datum[1];
-
-					return player1;
-				})
-				.collect(Collectors.toList());
+            return player0;
+        });
 
 
-		assertIterableEquals(expectedPlayers, actualPlayers);
-	}
+        List<Player> expectedPlayers = Stream.of(DATA)
+                .map(datum -> {
+                    Player player1 = new Player();
+                    player1.name = (String) datum[0];
+                    player1.value = (int) datum[1];
 
-	@Test
-	void testQueryForMap() {
-		String sql = MessageFormat.format("SELECT {1}, {2} FROM {0} WHERE {1} LIKE ''{3}''",
-				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, DATA[0][0]);
+                    return player1;
+                })
+                .collect(Collectors.toList());
 
-		Map<String, Object> actualMap = jdbcTemplate.queryForMap(sql);
 
-		Map<String, Object> expectedMap = ImmutableMap.of(
-				COLUMN_NAME, DATA[0][0],
-				COLUMN_VALUE, DATA[0][1]);
+        assertIterableEquals(expectedPlayers, actualPlayers);
+    }
 
-		assertIterableEquals(expectedMap.entrySet(), actualMap.entrySet());
-	}
+    @Test
+    void testQueryForMap() {
+        String sql = MessageFormat.format("SELECT {1}, {2} FROM {0} WHERE {1} LIKE ''{3}''",
+                TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, DATA[0][0]);
 
-	@Test
-	void testQueryForMapList() {
-		String sql = MessageFormat.format("SELECT {1}, {2} FROM {0}",
-				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE);
+        Map<String, Object> actualMap = jdbcTemplate.queryForMap(sql);
 
-		List<Map<String, Object>> actualMapList = jdbcTemplate.queryForMapList(sql);
+        Map<String, Object> expectedMap = ImmutableMap.of(
+                COLUMN_NAME, DATA[0][0],
+                COLUMN_VALUE, DATA[0][1]);
 
-		List<Map<String, Object>> expectedMapList = Stream.of(DATA)
-				.map(datum -> ImmutableMap.of(COLUMN_NAME, datum[0], COLUMN_VALUE, datum[1]))
-				.collect(Collectors.toList());
+        assertIterableEquals(expectedMap.entrySet(), actualMap.entrySet());
+    }
 
-		assertIterableEquals(expectedMapList, actualMapList);
+    @Test
+    void testQueryForMapList() {
+        String sql = MessageFormat.format("SELECT {1}, {2} FROM {0}",
+                TABLE_NAME, COLUMN_NAME, COLUMN_VALUE);
 
-	}
+        List<Map<String, Object>> actualMapList = jdbcTemplate.queryForMapList(sql);
 
-	@Test
-	void testUpdate() {
-		String newName = "Player X";
-		String sql = MessageFormat.format("UPDATE {0} SET {1} = ''{3}'' WHERE {1} LIKE ''{2}''",
-				TABLE_NAME, COLUMN_NAME, DATA[0][0], newName);
+        List<Map<String, Object>> expectedMapList = Stream.of(DATA)
+                .map(datum -> ImmutableMap.of(COLUMN_NAME, datum[0], COLUMN_VALUE, datum[1]))
+                .collect(Collectors.toList());
 
-		int rows = jdbcTemplate.update(sql);
+        assertIterableEquals(expectedMapList, actualMapList);
 
-		assertEquals(1, rows);
+    }
 
-		sql = MessageFormat.format("SELECT {2} FROM {0} WHERE {1} LIKE ''{3}''",
-				TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, newName);
+    @Test
+    void testUpdate() {
+        String newName = "Player X";
+        String sql = MessageFormat.format("UPDATE {0} SET {1} = ''{3}'' WHERE {1} LIKE ''{2}''",
+                TABLE_NAME, COLUMN_NAME, DATA[0][0], newName);
 
-		Integer value = jdbcTemplate.query(sql, rs -> {
-			if (rs.next()) {
-				return rs.getInt(1);
-			} else {
-				return null;
-			}
-		});
+        int rows = jdbcTemplate.update(sql);
 
-		assertEquals(DATA[0][1], value);
-	}
+        assertEquals(1, rows);
 
-	private void createTable() {
-		jdbcTemplate.execute("CREATE TABLE " + TABLE_NAME + " (" +
-				COLUMN_ID + " bigint auto_increment," +
-				COLUMN_NAME + " varchar(16)," +
-				COLUMN_VALUE + " integer)");
-	}
+        sql = MessageFormat.format("SELECT {2} FROM {0} WHERE {1} LIKE ''{3}''",
+                TABLE_NAME, COLUMN_NAME, COLUMN_VALUE, newName);
 
-	private void dropTable() {
-		jdbcTemplate.execute("DROP TABLE IF EXISTS " + TABLE_NAME);
-	}
+        Integer value = jdbcTemplate.query(sql, rs -> {
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                return null;
+            }
+        });
 
-	class Player {
-		String name;
-		int value;
+        assertEquals(DATA[0][1], value);
+    }
 
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (!(o instanceof Player)) return false;
-			Player player = (Player) o;
-			return new EqualsBuilder().append(value, player.value).append(name, player.name).isEquals();
-		}
+    private void createTable() {
+        jdbcTemplate.execute("CREATE TABLE " + TABLE_NAME + " (" +
+                COLUMN_ID + " bigint auto_increment," +
+                COLUMN_NAME + " varchar(16)," +
+                COLUMN_VALUE + " integer)");
+    }
 
-		@Override
-		public int hashCode() {
-			return new HashCodeBuilder(17, 37).append(name).append(value).toHashCode();
-		}
-	}
+    private void dropTable() {
+        jdbcTemplate.execute("DROP TABLE IF EXISTS " + TABLE_NAME);
+    }
 
-	@Nested
-	class JdbcTemplateTest_ExecuteTestCase {
+    class Player {
+        String name;
+        int value;
 
-		@BeforeEach
-		void before() {
-			jdbcTemplate = new JdbcTemplate(dataSource);
-			dropTable();
-		}
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Player)) return false;
+            Player player = (Player) o;
+            return new EqualsBuilder().append(value, player.value).append(name, player.name).isEquals();
+        }
 
-		@AfterEach
-		void after() {
-			dropTable();
-		}
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder(17, 37).append(name).append(value).toHashCode();
+        }
+    }
 
-		@Test
-		void test() throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
-			createTable();
+    @Nested
+    class JdbcTemplateTest_ExecuteTestCase {
 
-			//region Check result
-			Class.forName("org.h2.Driver").newInstance();
-			Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
-			ResultSet resultSet = connection.getMetaData().getTables(JDBC_DB_NAME.toUpperCase(), "PUBLIC",
-					TABLE_NAME.toUpperCase(), new String[]{"TABLE"});
+        @BeforeEach
+        void before() {
+            jdbcTemplate = new JdbcTemplate(dataSource);
+            dropTable();
+        }
 
-			assertTrue(resultSet.next());
+        @AfterEach
+        void after() {
+            dropTable();
+        }
 
-			resultSet.close();
-			connection.close();
-			//endregion
-		}
-	}
+        @Test
+        void test() throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
+            createTable();
+
+            //region Check result
+            Class.forName("org.h2.Driver").newInstance();
+            Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
+            ResultSet resultSet = connection.getMetaData().getTables(JDBC_DB_NAME.toUpperCase(), "PUBLIC",
+                    TABLE_NAME.toUpperCase(), new String[]{"TABLE"});
+
+            assertTrue(resultSet.next());
+
+            resultSet.close();
+            connection.close();
+            //endregion
+        }
+    }
 }
