@@ -29,7 +29,7 @@ ext {
             ]],
             commons_text: 'org.apache.commons:commons-text:1.9',
             lombok: 'org.projectlombok:lombok:1.18.12',
-            reflection_object: 'ru.dmitriymx:reflection-object:1.0-BETA',
+            reflection_object: 'ru.dmitriymx:reflection-object:1.2',
             test: [
                     junit5: [
                             "org.junit.jupiter:junit-jupiter-api:$junitVersion",
