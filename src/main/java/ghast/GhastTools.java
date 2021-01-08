@@ -17,11 +17,7 @@ public class GhastTools {
     private static WeakReference<Plugin> refPlugin;
 
     public void setPlugin(Plugin plugin) {
-        if (plugin == null) {
-            refPlugin = null;
-        } else {
-            refPlugin = new WeakReference<>(plugin);
-        }
+        refPlugin = plugin == null ? null : new WeakReference<>(plugin);
     }
 
     public Plugin getPlugin() {
