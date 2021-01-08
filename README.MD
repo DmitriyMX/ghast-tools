@@ -1,6 +1,6 @@
 # GHAST TOOLS
 
-![version: 1.10](https://img.shields.io/badge/version-1.10-0a0.svg?style=flat)
+![version: 1.11](https://img.shields.io/badge/version-1.11-0a0.svg?style=flat)
 ![bukkit-api: 1.12](https://img.shields.io/badge/bukkit--api-1.12-d50.svg?style=flat)
 
 Набор вспомогательных инструментов для Bukkit API.  
@@ -654,7 +654,7 @@ repositories {
 ```
 
 ```groovy
-implementation group: 'ghast', name: 'ghast-tools', version: '1.10'
+implementation group: 'ghast', name: 'ghast-tools', version: '1.11'
 ```
 
 ### Maven
@@ -673,7 +673,7 @@ implementation group: 'ghast', name: 'ghast-tools', version: '1.10'
     <dependency>
         <groupId>ghast</groupId>
         <artifactId>ghast-tools</artifactId>
-        <version>1.10</version>
+        <version>1.11</version>
     </dependency>
 </dependencies>
 ```
