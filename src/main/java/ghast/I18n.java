@@ -22,7 +22,6 @@ public class I18n {
     private final Table<String/*Lang*/, String/*Key*/, String/*Template|Message*/> messagesMap = HashBasedTable.create();
 
     //region Load messages
-    @SuppressWarnings("java:S112")
     public void loadMessages(String lang, Reader reader) {
         Map<String, String> map = messagesMap.row(lang.toLowerCase());
 

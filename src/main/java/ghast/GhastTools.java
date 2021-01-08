@@ -16,7 +16,6 @@ public class GhastTools {
 
     private static WeakReference<Plugin> refPlugin;
 
-    @SuppressWarnings("java:S2696")
     public void setPlugin(Plugin plugin) {
         if (plugin == null) {
             refPlugin = null;
@@ -25,7 +24,6 @@ public class GhastTools {
         }
     }
 
-    @SuppressWarnings("java:S112")
     public Plugin getPlugin() {
         if (refPlugin == null) {
             throw new RuntimeException("Plugin not set.");
@@ -39,7 +37,6 @@ public class GhastTools {
         return plugin;
     }
 
-    @SuppressWarnings("java:S112")
     public YamlConfiguration loadConfig(boolean saveDefault) {
         if (saveDefault) {
             getPlugin().saveDefaultConfig();

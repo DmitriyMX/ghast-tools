@@ -46,7 +46,6 @@ class CommandWrapper extends BukkitCommand {
     }
 
     @Override
-    @SuppressWarnings("java:S1066")
     public boolean execute(CommandSender commandSender, String commandName, String[] args) {
         if (Boolean.TRUE.equals(onlyPlayer)) {
             if (!(commandSender instanceof Player)) {

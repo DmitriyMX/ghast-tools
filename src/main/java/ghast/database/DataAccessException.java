@@ -2,7 +2,6 @@ package ghast.database;
 
 import lombok.Getter;
 
-@SuppressWarnings("java:S1165")
 @Getter
 public class DataAccessException extends RuntimeException {
 
