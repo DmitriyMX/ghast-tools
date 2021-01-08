@@ -2,6 +2,7 @@ package ghast;
 
 import ghast.assets.AssetsManager;
 import lombok.experimental.UtilityClass;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
@@ -53,5 +54,9 @@ public class GhastTools {
 
 	public YamlConfiguration loadConfig() {
 		return loadConfig(true);
+	}
+
+	public Location copyLocation(Location location) {
+		return new Location(location.getWorld(), location.getX(), location.getY(), location.getZ());
 	}
 }
