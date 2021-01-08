@@ -62,6 +62,15 @@ YamlConfiguration config = GhastTools.loadConfig(false);
 Если передать параметр `false`, то при отсутствии файла `config.yml` в папке плагина,
 будет загруден исключительно встроенный файл настроек.
 
+### copyLocation
+
+Копирования объекта `Location`
+
+```java
+Location location = ...;
+Location copyLoc = GhastTools.copyLocation(location); 
+```
+
 ## AssetsManager
 
 Методы по работе с файлами плагина (_"ассетами"_).
@@ -110,10 +119,44 @@ _По-умолчанию равен `StandardCharsets.UTF_8`_
 
 ### placeSkull
 
+Установка черепа.
+
 ```java
 Location location = ...;
-Skull skull = BuildHelper.placeSkull(location, BlockFace.NORTH)
+Skull skull = BuildHelper.placeSkull(location, BlockFace.NORTH);
+skull.update(true); // иначе изменения на карте не применятся и череп будет висеть в воздухе
 ```
+
+### placePlayerHead
+
+Установка головы игрока.
+
+```java
+Location location = ...;
+Skull playerHead = BuildHelper.placePlayerHead(location, BlockFace.NORTH);
+playerHead.update(true); // иначе изменения на карте не применятся и голова будет висеть в воздухе
+```
+
+Если третьим параметром передать URL текстуры, то голова будет текстурирована.
+
+```java
+Location location = ...;
+BuildHelper.placePlayerHead(location, BlockFace.NORTH, "http://...");
+```
+
+### setPlayerHeadSkin
+
+Установка текстуры для головы игрока.
+
+```java
+Location location = ...;
+Skull playerHead = BuildHelper.placePlayerHead(location, BlockFace.NORTH);
+playerHead.update(true); // иначе изменения на карте не применятся и голова будет висеть в воздухе
+setPlayerHeadSkin(playerHead);
+```
+
+Порядок выполнения методов в приведённом выше примере **важен**. Если `playerHead.update(true)` вызвать после
+установки текстуры, она собъётся на стандартную.
 
 ### placeSignWall
 
