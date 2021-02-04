@@ -621,7 +621,22 @@ message = Messages.get("welcome", "unknown_param_key", 123);
 // Приветствуем, {player}!
 ```
 
+### format
 
+**Messages** можно использовать и просто для форматирования параметизированных шаблонов:
+
+```java
+Map<String, Object> = map = new HashMap<>(1);
+map.put("player", "David");
+
+String message = Messages.format("Приветствуем, {player}!", map);
+// Приветствуем, David!
+```
+
+```java
+String message = Messages.foramt("Приветствуем, {player}!", "player", "David");
+// Приветствуем, David!
+```
 
 ## XLog
 
