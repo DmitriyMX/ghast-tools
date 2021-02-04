@@ -2,9 +2,9 @@ package ghast.scheduler;
 
 public interface ScheduleTask {
 
-	void start();
+    void start();
 
-	boolean isCanceled();
+    boolean isCanceled();
 
-	void cancel();
+    void cancel();
 }
