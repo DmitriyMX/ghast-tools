@@ -14,6 +14,9 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @deprecated use {@link Messages}
+ */
 @UtilityClass
 @SuppressWarnings("unused")
 @Deprecated

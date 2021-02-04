@@ -18,7 +18,7 @@ _Основан на версии Bukkit API 1.12._
 8. [JdbcTemplate](#jdbctemplate)
 9. [ScheduleManager](#schedulemanager)
 10. [ScheduleTask](#scheduletask)
-11. [I18n](#i18n)
+11. [Messages](#messages)
 12. [XLog](#xlog)
 13. [Подключение](#подключение)
     1. [Gradle](#gradle)
@@ -532,92 +532,96 @@ ScheduleTask scheduleTask = ...;
 scheduleTask.cancel();
 ```
 
-## I18n
+## Messages
 
-Инструмент для работы с мультиязыковыми сообщениями или просто сообщениями, которые храняться в отдельном файле.
+Инструмент для работы с параметизированными сообщениями или просто сообщениями, которые храняться в отдельном файле.
 
-Позволяет использовать шаблонизированные сообщения вида `Привет, {player}!`.
+Параметизированные сообщения имеют следующий вид: `Привет, {player}!`.
 
-### loadMessages
+### load
 
 Загрузка сообщений в инструмент.
 
-Передать можно как "мапу" с перечислением ключ-сообщение, так и `Reader` на файл в формате `key=message` (как у `Properties`).
+Есть три варианта: через `Properties`
 
 ```java
-Map<String, String> messagesMap = ...;
-I18n.loadMessages(messagesMap);
+Properties properties = ...;
+Messages.load(properties);
 ```
+
+через `Map<String, String>`
 
 ```java
-Reader reader = AssetsManager.getAsReader("messages.properties");
-I18n.loadMessages(reader);
+Map<String, String> map = ...;
+Messages.load(map);
 ```
 
-В первом параметре можно указать код языка, для которого загружаются сообщения. По-умолчанию будет "en".
+через `Reader`
 
 ```java
-Map<String, String> enMessagesMap = ...;
-Map<String, String> ruMessagesMap = ...;
-
-I18n.loadMessages("en", enMessagesMap);
-I18n.loadMessages("ru", ruMessagesMap);
+Reader reader = ...;
+Messages.load(reader);
 ```
 
-```java
-Reader readerEn = AssetsManager.getAsReader("messages.properties");
-Reader readerRu = AssetsManager.getAsReader("messages.ru.properties");
-
-I18n.loadMessages("en", readerEn);
-I18n.loadMessages("ru", readerRu);
-```
+Следует учесть, про при работе через `Reader`, **Messages** ожидает там обнаружить список строк в формате `key=value`.
 
 ### get
 
-Получение сообщения по его ключу.  
+Получение обычноего или параметизированного сообщения.
 
-```java
-String msg = I18n.get("player.join.msg");
+Для примера, пусть у нас будут такие сообщения:
+
+```properties
+simple=Простое сообщение
+welcome=Приветствуем, {player}!
 ```
 
-Если следующим сообщением указать `Map<String, Object>`, то можно будет воспользоваться шаблонизатором.
+Для получения простого сообщения, просто указываем его ключ:
 
 ```java
-Map<String, String> messagesMap = new HashMap<>();
-messagesMap.put("player.join.msg", "Привет, {player}!");
-
-I18n.loadMessages(messagesMap);
-
-Map<String, String> params = new HashMap<>();
-params.put("player", event.getPlayer().getName());
-
-String msg = I18n.get("player.join.msg", params);
+String message = Messages.get("simple");
+// Простое сообщение
 ```
 
-Однако можно создавать `Map<String, String> params` явно, а воспользоваться [paramBuilder()](#parambuilder)
+Для получения параметизированного сообщения, нужно помимо ключа передать параметры.
+Есть два способа: через `Map<String, Object>`
 
 ```java
-String msg = I18n.get("player.join.msg", I18n.paramBuilder()
-        .add("player", event.getPlayer().getName())
-        .build());
+Map<String, Object> = map = new HashMap<>(1);
+map.put("player", "David");
+
+String message = Messages.get("welcome", map);
+// Приветствуем, David!
 ```
 
-Можно первым параметром указать код языка.
+через попарное перечисление параметров
 
 ```java
-String msg = I18n.get("ru", "player.join.msg");
+String message = Messages.get("welcome", "player", "David");
+// Приветствуем, David!
 ```
 
-### paramBuilder
-
-Инструмент для параметизирования шаблонов сообщений.
+Если по указанному ключу сообщение отсутствует, то **Messages** вернёт значение самого ключа
 
 ```java
-Map<String, Object> params = I18n.paramBuilder()
-        .add("player", event.getPlayer().getName())
-        .build();
-String msg = I18n.get("player.join.msg", params);
+String message = Messages.get("not_exists_key");
+// not_exists_key
+
+message = Messages.get("not_exists_key", "player", "David");
+// not_exists_key
 ```
+
+Если параметр, который указан в шаблоне не был указан/определён, то параметр останется как есть
+
+```java
+String message = Messages.get("welcome");
+// Приветствуем, {player}!
+
+message = Messages.get("welcome", "unknown_param_key", 123);
+// Приветствуем, {player}!
+```
+
+
 
 ## XLog
 
