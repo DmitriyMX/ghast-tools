@@ -84,7 +84,7 @@ public class Messages {
 		String keyLc = key.toLowerCase();
 
 		if (MESSAGES_MAP.containsKey(keyLc)) {
-			return formatMessage(MESSAGES_MAP.get(keyLc), params);
+			return format(MESSAGES_MAP.get(keyLc), params);
 		} else {
 			return keyLc;
 		}
@@ -101,26 +101,50 @@ public class Messages {
 		String keyLc = key.toLowerCase();
 
 		if (MESSAGES_MAP.containsKey(keyLc)) {
-			int len;
-			if ((params.length % 2) == 1) {
-				len = params.length - 1;
-			} else {
-				len = params.length;
-			}
-
-			Map<String, Object> mapParams = new HashMap<>(len / 2);
-			for (int i = 0; i < len; i = i + 2) {
-				mapParams.put((String) params[i], params[i + 1]);
-			}
-
-			return formatMessage(MESSAGES_MAP.get(keyLc), mapParams);
+			return format(MESSAGES_MAP.get(keyLc), params);
 		} else {
 			return keyLc;
 		}
 	}
 	//endregion
 
-	private String formatMessage(String format, Map<String, Object> params) {
+	//region Format message
+	/**
+	 * Получить сообщение по формату.
+	 *
+	 * @param format параметизированное сообщение
+	 * @param params параметры
+	 * @return сообщение
+	 */
+	public String format(String format, Map<String, Object> params) {
 		return StringSubstitutor.replace(format, params, "{", "}");
+	}
+
+	/**
+	 * Получить сообщение по формату.
+	 *
+	 * @param format параметизированное сообщение
+	 * @param params параметры
+	 * @return сообщение
+	 */
+	public String format(String format, Object... params) {
+		return format(format, arrayParamsToMap(params));
+	}
+	//endregion
+
+	private Map<String, Object> arrayParamsToMap(Object... params) {
+		int len;
+		if ((params.length % 2) == 1) {
+			len = params.length - 1;
+		} else {
+			len = params.length;
+		}
+
+		Map<String, Object> map = new HashMap<>(len / 2);
+		for (int i = 0; i < len; i = i + 2) {
+			map.put((String) params[i], params[i + 1]);
+		}
+
+		return map;
 	}
 }
