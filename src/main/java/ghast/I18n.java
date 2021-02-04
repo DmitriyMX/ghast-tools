@@ -16,6 +16,7 @@ import java.util.Map;
 
 @UtilityClass
 @SuppressWarnings("unused")
+@Deprecated
 public class I18n {
 
     private final String DEFAULT_LANG = "en";
